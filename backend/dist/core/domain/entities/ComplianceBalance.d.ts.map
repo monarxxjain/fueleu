@@ -1,0 +1,1 @@
+{"version":3,"file":"ComplianceBalance.d.ts","sourceRoot":"","sources":["../../../../src/core/domain/entities/ComplianceBalance.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,iBAAiB;IAChC,EAAE,EAAE,MAAM,CAAC;IACX,MAAM,EAAE,MAAM,CAAC;IACf,IAAI,EAAE,MAAM,CAAC;IACb,QAAQ,EAAE,MAAM,CAAC;IACjB,UAAU,EAAE,IAAI,CAAC;CAClB"}
