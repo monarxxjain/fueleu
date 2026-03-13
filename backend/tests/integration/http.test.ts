@@ -182,4 +182,36 @@ describe('HTTP integration', () => {
     expect(persistedPool).not.toBeNull();
     expect(persistedPool?.members).toHaveLength(2);
   });
+
+  it('rejects creating another pool when a ship is already pooled in the same year', async () => {
+    await seedRoutes();
+
+    await request(app).get('/compliance/cb').query({ shipId: 'TEST-NEG', year: 2024 });
+    await request(app).get('/compliance/cb').query({ shipId: 'TEST-POOL', year: 2024 });
+    await request(app).get('/compliance/cb').query({ shipId: 'TEST-POS', year: 2024 });
+
+    const first = await request(app)
+      .post('/pools')
+      .send({
+        year: 2024,
+        members: [
+          { shipId: 'TEST-NEG', year: 2024 },
+          { shipId: 'TEST-POOL', year: 2024 },
+        ],
+      });
+    expect(first.status).toBe(201);
+
+    const second = await request(app)
+      .post('/pools')
+      .send({
+        year: 2024,
+        members: [
+          { shipId: 'TEST-NEG', year: 2024 },
+          { shipId: 'TEST-POS', year: 2024 },
+        ],
+      });
+
+    expect(second.status).toBe(409);
+    expect(second.body.error).toContain('already assigned to a pool');
+  });
 });

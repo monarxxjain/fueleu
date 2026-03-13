@@ -695,6 +695,7 @@ export declare const PoolMemberScalarFieldEnum: {
     readonly id: "id";
     readonly poolId: "poolId";
     readonly shipId: "shipId";
+    readonly year: "year";
     readonly cbBefore: "cbBefore";
     readonly cbAfter: "cbAfter";
 };

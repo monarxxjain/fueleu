@@ -153,6 +153,7 @@ exports.PoolMemberScalarFieldEnum = {
     id: 'id',
     poolId: 'poolId',
     shipId: 'shipId',
+    year: 'year',
     cbBefore: 'cbBefore',
     cbAfter: 'cbAfter'
 };

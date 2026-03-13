@@ -3,6 +3,10 @@ import type { IPoolService, PoolMemberInput } from '../../core/ports/IPoolServic
 import { apiFetch } from './apiClient';
 
 export class PoolApiAdapter implements IPoolService {
+  async getPools(year: number): Promise<PoolResult[]> {
+    return apiFetch<PoolResult[]>(`/pools?year=${year}`);
+  }
+
   async createPool(year: number, members: PoolMemberInput[]): Promise<PoolResult> {
     return apiFetch<PoolResult>('/pools', {
       method: 'POST',

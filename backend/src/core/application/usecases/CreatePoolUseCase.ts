@@ -25,6 +25,21 @@ export class CreatePoolUseCase {
       throw new Error('A pool must have at least 2 members');
     }
 
+    const requestedShipIds = [...new Set(input.members.map((m) => m.shipId))];
+    if (requestedShipIds.length !== input.members.length) {
+      throw new Error('A ship cannot appear more than once in the same pool request');
+    }
+
+    const alreadyAssigned = await this.poolRepo.findAssignedShipIds(
+      input.year,
+      requestedShipIds
+    );
+    if (alreadyAssigned.length > 0) {
+      throw new Error(
+        `Ship(s) already assigned to a pool for ${input.year}: ${alreadyAssigned.join(', ')}`
+      );
+    }
+
     // Gather adjusted CB for each member
     const memberData: Array<{ shipId: string; adjustedCB: number }> = [];
     for (const m of input.members) {
@@ -89,7 +104,7 @@ export class CreatePoolUseCase {
         cbBefore: original.adjustedCB,
         cbAfter: m.cbAfter,
       };
-      await this.poolRepo.addMember(pool.id, member);
+      await this.poolRepo.addMember(pool.id, input.year, member);
       finalMembers.push(member);
     }
 

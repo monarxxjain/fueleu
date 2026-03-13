@@ -13,10 +13,12 @@ export type AggregatePoolMember = {
     _max: PoolMemberMaxAggregateOutputType | null;
 };
 export type PoolMemberAvgAggregateOutputType = {
+    year: number | null;
     cbBefore: number | null;
     cbAfter: number | null;
 };
 export type PoolMemberSumAggregateOutputType = {
+    year: number | null;
     cbBefore: number | null;
     cbAfter: number | null;
 };
@@ -24,6 +26,7 @@ export type PoolMemberMinAggregateOutputType = {
     id: string | null;
     poolId: string | null;
     shipId: string | null;
+    year: number | null;
     cbBefore: number | null;
     cbAfter: number | null;
 };
@@ -31,6 +34,7 @@ export type PoolMemberMaxAggregateOutputType = {
     id: string | null;
     poolId: string | null;
     shipId: string | null;
+    year: number | null;
     cbBefore: number | null;
     cbAfter: number | null;
 };
@@ -38,15 +42,18 @@ export type PoolMemberCountAggregateOutputType = {
     id: number;
     poolId: number;
     shipId: number;
+    year: number;
     cbBefore: number;
     cbAfter: number;
     _all: number;
 };
 export type PoolMemberAvgAggregateInputType = {
+    year?: true;
     cbBefore?: true;
     cbAfter?: true;
 };
 export type PoolMemberSumAggregateInputType = {
+    year?: true;
     cbBefore?: true;
     cbAfter?: true;
 };
@@ -54,6 +61,7 @@ export type PoolMemberMinAggregateInputType = {
     id?: true;
     poolId?: true;
     shipId?: true;
+    year?: true;
     cbBefore?: true;
     cbAfter?: true;
 };
@@ -61,6 +69,7 @@ export type PoolMemberMaxAggregateInputType = {
     id?: true;
     poolId?: true;
     shipId?: true;
+    year?: true;
     cbBefore?: true;
     cbAfter?: true;
 };
@@ -68,6 +77,7 @@ export type PoolMemberCountAggregateInputType = {
     id?: true;
     poolId?: true;
     shipId?: true;
+    year?: true;
     cbBefore?: true;
     cbAfter?: true;
     _all?: true;
@@ -152,6 +162,7 @@ export type PoolMemberGroupByOutputType = {
     id: string;
     poolId: string;
     shipId: string;
+    year: number;
     cbBefore: number;
     cbAfter: number;
     _count: PoolMemberCountAggregateOutputType | null;
@@ -170,6 +181,7 @@ export type PoolMemberWhereInput = {
     id?: Prisma.StringFilter<"PoolMember"> | string;
     poolId?: Prisma.StringFilter<"PoolMember"> | string;
     shipId?: Prisma.StringFilter<"PoolMember"> | string;
+    year?: Prisma.IntFilter<"PoolMember"> | number;
     cbBefore?: Prisma.FloatFilter<"PoolMember"> | number;
     cbAfter?: Prisma.FloatFilter<"PoolMember"> | number;
     pool?: Prisma.XOR<Prisma.PoolScalarRelationFilter, Prisma.PoolWhereInput>;
@@ -178,25 +190,29 @@ export type PoolMemberOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
     poolId?: Prisma.SortOrder;
     shipId?: Prisma.SortOrder;
+    year?: Prisma.SortOrder;
     cbBefore?: Prisma.SortOrder;
     cbAfter?: Prisma.SortOrder;
     pool?: Prisma.PoolOrderByWithRelationInput;
 };
 export type PoolMemberWhereUniqueInput = Prisma.AtLeast<{
     id?: string;
+    shipId_year?: Prisma.PoolMemberShipIdYearCompoundUniqueInput;
     AND?: Prisma.PoolMemberWhereInput | Prisma.PoolMemberWhereInput[];
     OR?: Prisma.PoolMemberWhereInput[];
     NOT?: Prisma.PoolMemberWhereInput | Prisma.PoolMemberWhereInput[];
     poolId?: Prisma.StringFilter<"PoolMember"> | string;
     shipId?: Prisma.StringFilter<"PoolMember"> | string;
+    year?: Prisma.IntFilter<"PoolMember"> | number;
     cbBefore?: Prisma.FloatFilter<"PoolMember"> | number;
     cbAfter?: Prisma.FloatFilter<"PoolMember"> | number;
     pool?: Prisma.XOR<Prisma.PoolScalarRelationFilter, Prisma.PoolWhereInput>;
-}, "id">;
+}, "id" | "shipId_year">;
 export type PoolMemberOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
     poolId?: Prisma.SortOrder;
     shipId?: Prisma.SortOrder;
+    year?: Prisma.SortOrder;
     cbBefore?: Prisma.SortOrder;
     cbAfter?: Prisma.SortOrder;
     _count?: Prisma.PoolMemberCountOrderByAggregateInput;
@@ -212,12 +228,14 @@ export type PoolMemberScalarWhereWithAggregatesInput = {
     id?: Prisma.StringWithAggregatesFilter<"PoolMember"> | string;
     poolId?: Prisma.StringWithAggregatesFilter<"PoolMember"> | string;
     shipId?: Prisma.StringWithAggregatesFilter<"PoolMember"> | string;
+    year?: Prisma.IntWithAggregatesFilter<"PoolMember"> | number;
     cbBefore?: Prisma.FloatWithAggregatesFilter<"PoolMember"> | number;
     cbAfter?: Prisma.FloatWithAggregatesFilter<"PoolMember"> | number;
 };
 export type PoolMemberCreateInput = {
     id?: string;
     shipId: string;
+    year: number;
     cbBefore: number;
     cbAfter: number;
     pool: Prisma.PoolCreateNestedOneWithoutMembersInput;
@@ -226,12 +244,14 @@ export type PoolMemberUncheckedCreateInput = {
     id?: string;
     poolId: string;
     shipId: string;
+    year: number;
     cbBefore: number;
     cbAfter: number;
 };
 export type PoolMemberUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     shipId?: Prisma.StringFieldUpdateOperationsInput | string;
+    year?: Prisma.IntFieldUpdateOperationsInput | number;
     cbBefore?: Prisma.FloatFieldUpdateOperationsInput | number;
     cbAfter?: Prisma.FloatFieldUpdateOperationsInput | number;
     pool?: Prisma.PoolUpdateOneRequiredWithoutMembersNestedInput;
@@ -240,6 +260,7 @@ export type PoolMemberUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     poolId?: Prisma.StringFieldUpdateOperationsInput | string;
     shipId?: Prisma.StringFieldUpdateOperationsInput | string;
+    year?: Prisma.IntFieldUpdateOperationsInput | number;
     cbBefore?: Prisma.FloatFieldUpdateOperationsInput | number;
     cbAfter?: Prisma.FloatFieldUpdateOperationsInput | number;
 };
@@ -247,12 +268,14 @@ export type PoolMemberCreateManyInput = {
     id?: string;
     poolId: string;
     shipId: string;
+    year: number;
     cbBefore: number;
     cbAfter: number;
 };
 export type PoolMemberUpdateManyMutationInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     shipId?: Prisma.StringFieldUpdateOperationsInput | string;
+    year?: Prisma.IntFieldUpdateOperationsInput | number;
     cbBefore?: Prisma.FloatFieldUpdateOperationsInput | number;
     cbAfter?: Prisma.FloatFieldUpdateOperationsInput | number;
 };
@@ -260,6 +283,7 @@ export type PoolMemberUncheckedUpdateManyInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     poolId?: Prisma.StringFieldUpdateOperationsInput | string;
     shipId?: Prisma.StringFieldUpdateOperationsInput | string;
+    year?: Prisma.IntFieldUpdateOperationsInput | number;
     cbBefore?: Prisma.FloatFieldUpdateOperationsInput | number;
     cbAfter?: Prisma.FloatFieldUpdateOperationsInput | number;
 };
@@ -271,14 +295,20 @@ export type PoolMemberListRelationFilter = {
 export type PoolMemberOrderByRelationAggregateInput = {
     _count?: Prisma.SortOrder;
 };
+export type PoolMemberShipIdYearCompoundUniqueInput = {
+    shipId: string;
+    year: number;
+};
 export type PoolMemberCountOrderByAggregateInput = {
     id?: Prisma.SortOrder;
     poolId?: Prisma.SortOrder;
     shipId?: Prisma.SortOrder;
+    year?: Prisma.SortOrder;
     cbBefore?: Prisma.SortOrder;
     cbAfter?: Prisma.SortOrder;
 };
 export type PoolMemberAvgOrderByAggregateInput = {
+    year?: Prisma.SortOrder;
     cbBefore?: Prisma.SortOrder;
     cbAfter?: Prisma.SortOrder;
 };
@@ -286,6 +316,7 @@ export type PoolMemberMaxOrderByAggregateInput = {
     id?: Prisma.SortOrder;
     poolId?: Prisma.SortOrder;
     shipId?: Prisma.SortOrder;
+    year?: Prisma.SortOrder;
     cbBefore?: Prisma.SortOrder;
     cbAfter?: Prisma.SortOrder;
 };
@@ -293,10 +324,12 @@ export type PoolMemberMinOrderByAggregateInput = {
     id?: Prisma.SortOrder;
     poolId?: Prisma.SortOrder;
     shipId?: Prisma.SortOrder;
+    year?: Prisma.SortOrder;
     cbBefore?: Prisma.SortOrder;
     cbAfter?: Prisma.SortOrder;
 };
 export type PoolMemberSumOrderByAggregateInput = {
+    year?: Prisma.SortOrder;
     cbBefore?: Prisma.SortOrder;
     cbAfter?: Prisma.SortOrder;
 };
@@ -341,12 +374,14 @@ export type PoolMemberUncheckedUpdateManyWithoutPoolNestedInput = {
 export type PoolMemberCreateWithoutPoolInput = {
     id?: string;
     shipId: string;
+    year: number;
     cbBefore: number;
     cbAfter: number;
 };
 export type PoolMemberUncheckedCreateWithoutPoolInput = {
     id?: string;
     shipId: string;
+    year: number;
     cbBefore: number;
     cbAfter: number;
 };
@@ -378,30 +413,35 @@ export type PoolMemberScalarWhereInput = {
     id?: Prisma.StringFilter<"PoolMember"> | string;
     poolId?: Prisma.StringFilter<"PoolMember"> | string;
     shipId?: Prisma.StringFilter<"PoolMember"> | string;
+    year?: Prisma.IntFilter<"PoolMember"> | number;
     cbBefore?: Prisma.FloatFilter<"PoolMember"> | number;
     cbAfter?: Prisma.FloatFilter<"PoolMember"> | number;
 };
 export type PoolMemberCreateManyPoolInput = {
     id?: string;
     shipId: string;
+    year: number;
     cbBefore: number;
     cbAfter: number;
 };
 export type PoolMemberUpdateWithoutPoolInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     shipId?: Prisma.StringFieldUpdateOperationsInput | string;
+    year?: Prisma.IntFieldUpdateOperationsInput | number;
     cbBefore?: Prisma.FloatFieldUpdateOperationsInput | number;
     cbAfter?: Prisma.FloatFieldUpdateOperationsInput | number;
 };
 export type PoolMemberUncheckedUpdateWithoutPoolInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     shipId?: Prisma.StringFieldUpdateOperationsInput | string;
+    year?: Prisma.IntFieldUpdateOperationsInput | number;
     cbBefore?: Prisma.FloatFieldUpdateOperationsInput | number;
     cbAfter?: Prisma.FloatFieldUpdateOperationsInput | number;
 };
 export type PoolMemberUncheckedUpdateManyWithoutPoolInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     shipId?: Prisma.StringFieldUpdateOperationsInput | string;
+    year?: Prisma.IntFieldUpdateOperationsInput | number;
     cbBefore?: Prisma.FloatFieldUpdateOperationsInput | number;
     cbAfter?: Prisma.FloatFieldUpdateOperationsInput | number;
 };
@@ -409,6 +449,7 @@ export type PoolMemberSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
     id?: boolean;
     poolId?: boolean;
     shipId?: boolean;
+    year?: boolean;
     cbBefore?: boolean;
     cbAfter?: boolean;
     pool?: boolean | Prisma.PoolDefaultArgs<ExtArgs>;
@@ -417,6 +458,7 @@ export type PoolMemberSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
     id?: boolean;
     poolId?: boolean;
     shipId?: boolean;
+    year?: boolean;
     cbBefore?: boolean;
     cbAfter?: boolean;
     pool?: boolean | Prisma.PoolDefaultArgs<ExtArgs>;
@@ -425,6 +467,7 @@ export type PoolMemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
     id?: boolean;
     poolId?: boolean;
     shipId?: boolean;
+    year?: boolean;
     cbBefore?: boolean;
     cbAfter?: boolean;
     pool?: boolean | Prisma.PoolDefaultArgs<ExtArgs>;
@@ -433,10 +476,11 @@ export type PoolMemberSelectScalar = {
     id?: boolean;
     poolId?: boolean;
     shipId?: boolean;
+    year?: boolean;
     cbBefore?: boolean;
     cbAfter?: boolean;
 };
-export type PoolMemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "poolId" | "shipId" | "cbBefore" | "cbAfter", ExtArgs["result"]["poolMember"]>;
+export type PoolMemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "poolId" | "shipId" | "year" | "cbBefore" | "cbAfter", ExtArgs["result"]["poolMember"]>;
 export type PoolMemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     pool?: boolean | Prisma.PoolDefaultArgs<ExtArgs>;
 };
@@ -455,6 +499,7 @@ export type $PoolMemberPayload<ExtArgs extends runtime.Types.Extensions.Internal
         id: string;
         poolId: string;
         shipId: string;
+        year: number;
         cbBefore: number;
         cbAfter: number;
     }, ExtArgs["result"]["poolMember"]>;
@@ -815,6 +860,7 @@ export interface PoolMemberFieldRefs {
     readonly id: Prisma.FieldRef<"PoolMember", 'String'>;
     readonly poolId: Prisma.FieldRef<"PoolMember", 'String'>;
     readonly shipId: Prisma.FieldRef<"PoolMember", 'String'>;
+    readonly year: Prisma.FieldRef<"PoolMember", 'Int'>;
     readonly cbBefore: Prisma.FieldRef<"PoolMember", 'Float'>;
     readonly cbAfter: Prisma.FieldRef<"PoolMember", 'Float'>;
 }

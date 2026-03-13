@@ -59,10 +59,12 @@ model PoolMember {
   id       String @id @default(uuid())
   poolId   String @map("pool_id")
   shipId   String @map("ship_id")
+  year     Int
   cbBefore Float  @map("cb_before")
   cbAfter  Float  @map("cb_after")
 
   pool Pool @relation(fields: [poolId], references: [id], onDelete: Cascade)
 
+  @@unique([shipId, year])
   @@map("pool_members")
 }

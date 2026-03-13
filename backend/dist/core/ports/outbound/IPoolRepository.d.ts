@@ -5,7 +5,9 @@ export interface IPoolRepository {
         year: number;
         createdAt: Date;
     }>;
-    addMember(poolId: string, member: PoolMember): Promise<void>;
+    findAssignedShipIds(year: number, shipIds: string[]): Promise<string[]>;
+    findByYear(year: number): Promise<Pool[]>;
+    addMember(poolId: string, year: number, member: PoolMember): Promise<void>;
     findById(id: string): Promise<Pool | null>;
 }
 //# sourceMappingURL=IPoolRepository.d.ts.map

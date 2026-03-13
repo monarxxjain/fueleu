@@ -18,6 +18,7 @@ import { GetAdjustedCBUseCase } from '../core/application/usecases/GetAdjustedCB
 import { BankSurplusUseCase } from '../core/application/usecases/BankSurplusUseCase';
 import { ApplyBankedUseCase } from '../core/application/usecases/ApplyBankedUseCase';
 import { CreatePoolUseCase } from '../core/application/usecases/CreatePoolUseCase';
+import { GetPoolsByYearUseCase } from '../core/application/usecases/GetPoolsByYearUseCase';
 
 // Inbound adapters — controllers
 import { RouteController } from '../adapters/inbound/http/controllers/RouteController';
@@ -50,6 +51,7 @@ const getAdjustedCBUseCase = new GetAdjustedCBUseCase(complianceRepo, bankRepo);
 const bankSurplusUseCase = new BankSurplusUseCase(complianceRepo, bankRepo, cache);
 const applyBankedUseCase = new ApplyBankedUseCase(bankRepo, cache);
 const createPoolUseCase = new CreatePoolUseCase(complianceRepo, bankRepo, poolRepo);
+const getPoolsByYearUseCase = new GetPoolsByYearUseCase(poolRepo);
 
 // ── Controllers ─────────────────────────────────────────────────────────────
 export const routeController = new RouteController(
@@ -69,4 +71,7 @@ export const bankingController = new BankingController(
   bankRepo
 );
 
-export const poolController = new PoolController(createPoolUseCase);
+export const poolController = new PoolController(
+  createPoolUseCase,
+  getPoolsByYearUseCase
+);

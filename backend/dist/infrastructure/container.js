@@ -19,6 +19,7 @@ const GetAdjustedCBUseCase_1 = require("../core/application/usecases/GetAdjusted
 const BankSurplusUseCase_1 = require("../core/application/usecases/BankSurplusUseCase");
 const ApplyBankedUseCase_1 = require("../core/application/usecases/ApplyBankedUseCase");
 const CreatePoolUseCase_1 = require("../core/application/usecases/CreatePoolUseCase");
+const GetPoolsByYearUseCase_1 = require("../core/application/usecases/GetPoolsByYearUseCase");
 // Inbound adapters — controllers
 const RouteController_1 = require("../adapters/inbound/http/controllers/RouteController");
 const ComplianceController_1 = require("../adapters/inbound/http/controllers/ComplianceController");
@@ -46,9 +47,10 @@ const getAdjustedCBUseCase = new GetAdjustedCBUseCase_1.GetAdjustedCBUseCase(com
 const bankSurplusUseCase = new BankSurplusUseCase_1.BankSurplusUseCase(complianceRepo, bankRepo, exports.cache);
 const applyBankedUseCase = new ApplyBankedUseCase_1.ApplyBankedUseCase(bankRepo, exports.cache);
 const createPoolUseCase = new CreatePoolUseCase_1.CreatePoolUseCase(complianceRepo, bankRepo, poolRepo);
+const getPoolsByYearUseCase = new GetPoolsByYearUseCase_1.GetPoolsByYearUseCase(poolRepo);
 // ── Controllers ─────────────────────────────────────────────────────────────
 exports.routeController = new RouteController_1.RouteController(getRoutesUseCase, setBaselineUseCase, getComparisonUseCase);
 exports.complianceController = new ComplianceController_1.ComplianceController(computeCBUseCase, getAdjustedCBUseCase);
 exports.bankingController = new BankingController_1.BankingController(bankSurplusUseCase, applyBankedUseCase, bankRepo);
-exports.poolController = new PoolController_1.PoolController(createPoolUseCase);
+exports.poolController = new PoolController_1.PoolController(createPoolUseCase, getPoolsByYearUseCase);
 //# sourceMappingURL=container.js.map

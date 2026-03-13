@@ -22,6 +22,8 @@ function makeRepos(cbMap: Record<string, number>, bankedMap: Record<string, numb
   };
   const poolRepo: IPoolRepository = {
     create: vi.fn().mockResolvedValue({ id: 'pool-uuid', year: 2024, createdAt: new Date() }),
+    findAssignedShipIds: vi.fn().mockResolvedValue([]),
+    findByYear: vi.fn().mockResolvedValue([]),
     addMember: vi.fn(),
     findById: vi.fn(),
   };
@@ -87,5 +89,24 @@ describe('CreatePoolUseCase', () => {
         ],
       })
     ).rejects.toThrow('No compliance record');
+  });
+
+  it('rejects when a ship is already assigned to a pool for the same year', async () => {
+    const { complianceRepo, bankRepo, poolRepo } = makeRepos({
+      R002: 500_000,
+      R003: 200_000,
+    });
+    (poolRepo.findAssignedShipIds as ReturnType<typeof vi.fn>).mockResolvedValue(['R002']);
+
+    const uc = new CreatePoolUseCase(complianceRepo, bankRepo, poolRepo);
+    await expect(
+      uc.execute({
+        year: 2024,
+        members: [
+          { shipId: 'R002', year: 2024 },
+          { shipId: 'R003', year: 2024 },
+        ],
+      })
+    ).rejects.toThrow('already assigned to a pool');
   });
 });

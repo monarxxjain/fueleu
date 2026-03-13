@@ -10,7 +10,7 @@ import { FetchRoutesUseCase, SetBaselineUseCase } from '../../core/application/u
 import { FetchComparisonUseCase } from '../../core/application/usecases/ComparisonUseCase';
 import { FetchCBUseCase, FetchAdjustedCBUseCase } from '../../core/application/usecases/ComplianceUseCases';
 import { FetchBankRecordsUseCase, BankSurplusUseCase, ApplyBankedUseCase } from '../../core/application/usecases/BankingUseCases';
-import { CreatePoolUseCase } from '../../core/application/usecases/PoolUseCases';
+import { CreatePoolUseCase, FetchPoolsByYearUseCase } from '../../core/application/usecases/PoolUseCases';
 
 // Adapters (singleton instances)
 const routeAdapter = new RouteApiAdapter();
@@ -30,4 +30,5 @@ export const makeFetchBankRecordsUseCase = () => new FetchBankRecordsUseCase(ban
 export const makeBankSurplusUseCase = () => new BankSurplusUseCase(bankingAdapter);
 export const makeApplyBankedUseCase = () => new ApplyBankedUseCase(bankingAdapter);
 
+export const makeFetchPoolsByYearUseCase = () => new FetchPoolsByYearUseCase(poolAdapter);
 export const makeCreatePoolUseCase = () => new CreatePoolUseCase(poolAdapter);

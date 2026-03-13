@@ -11,3 +11,11 @@ export class CreatePoolUseCase {
     return this.service.createPool(year, members);
   }
 }
+
+export class FetchPoolsByYearUseCase {
+  constructor(private readonly service: IPoolService) {}
+
+  async execute(year: number): Promise<PoolResult[]> {
+    return this.service.getPools(year);
+  }
+}

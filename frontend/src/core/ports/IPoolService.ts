@@ -6,5 +6,6 @@ export interface PoolMemberInput {
 }
 
 export interface IPoolService {
+  getPools(year: number): Promise<PoolResult[]>;
   createPool(year: number, members: PoolMemberInput[]): Promise<PoolResult>;
 }

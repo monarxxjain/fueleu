@@ -9,7 +9,9 @@ export declare class PrismaPoolRepository implements IPoolRepository {
         year: number;
         createdAt: Date;
     }>;
-    addMember(poolId: string, member: PoolMember): Promise<void>;
+    findAssignedShipIds(year: number, shipIds: string[]): Promise<string[]>;
+    addMember(poolId: string, year: number, member: PoolMember): Promise<void>;
+    findByYear(year: number): Promise<Pool[]>;
     findById(id: string): Promise<Pool | null>;
 }
 //# sourceMappingURL=PrismaPoolRepository.d.ts.map

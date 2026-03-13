@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { CreatePoolUseCase } from '../../../core/application/usecases/PoolUseCases';
+import { CreatePoolUseCase, FetchPoolsByYearUseCase } from '../../../core/application/usecases/PoolUseCases';
 import type { IPoolService } from '../../../core/ports/IPoolService';
 import type { PoolResult } from '../../../core/domain/entities';
 
@@ -15,6 +15,7 @@ const mockResult: PoolResult = {
 
 function makeService(): IPoolService {
   return {
+    getPools: vi.fn().mockResolvedValue([mockResult]),
     createPool: vi.fn().mockResolvedValue(mockResult),
   };
 }
@@ -35,5 +36,12 @@ describe('CreatePoolUseCase', () => {
     await expect(
       new CreatePoolUseCase(service).execute(2024, [{ shipId: 'R002', year: 2024 }])
     ).rejects.toThrow('at least 2 members');
+  });
+
+  it('fetches existing pools by year', async () => {
+    const service = makeService();
+    const result = await new FetchPoolsByYearUseCase(service).execute(2024);
+    expect(service.getPools).toHaveBeenCalledWith(2024);
+    expect(result).toHaveLength(1);
   });
 });
