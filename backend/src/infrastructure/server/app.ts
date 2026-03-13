@@ -11,11 +11,53 @@ import {
   poolController,
 } from '../container';
 
+function normalizeOrigin(origin: string): string {
+  return origin.trim().replace(/\/$/, '');
+}
+
+function getAllowedOrigins(): Set<string> {
+  const configured = [process.env['FRONTEND_URL'], process.env['FRONTEND_URLS']]
+    .filter((value): value is string => Boolean(value))
+    .flatMap((value) => value.split(','))
+    .map(normalizeOrigin)
+    .filter(Boolean);
+
+  // Keep local development working even when env vars are not set.
+  configured.push('http://localhost:5173');
+  configured.push('http://127.0.0.1:5173');
+
+  return new Set(configured);
+}
+
+function isTrustedVercelPreview(origin: string): boolean {
+  // Allow Vercel preview URLs for this project naming pattern.
+  return /^https:\/\/fueleu-[a-z0-9-]+\.vercel\.app$/i.test(origin);
+}
+
 export function createApp(): express.Application {
   const app = express();
+  const allowedOrigins = getAllowedOrigins();
 
   // ── Middleware ─────────────────────────────────────────────────────────────
-  app.use(cors({ origin: process.env['FRONTEND_URL'] ?? 'http://localhost:5173' }));
+  app.use(
+    cors({
+      origin(origin, callback) {
+        // Allow non-browser or same-origin requests with no Origin header.
+        if (!origin) {
+          callback(null, true);
+          return;
+        }
+
+        const normalized = normalizeOrigin(origin);
+        if (allowedOrigins.has(normalized) || isTrustedVercelPreview(normalized)) {
+          callback(null, true);
+          return;
+        }
+
+        callback(new Error(`CORS blocked origin: ${origin}`));
+      },
+    })
+  );
   app.use(express.json());
 
   // ── Health check ───────────────────────────────────────────────────────────
