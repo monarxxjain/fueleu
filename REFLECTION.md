@@ -10,7 +10,39 @@ A full-stack FuelEU Maritime compliance dashboard — React frontend with four t
 
 The biggest insight is that **an AI agent is strongest as an architectural multiplier, not just a code generator**. When I gave the agent a clear architectural constraint ("strict hexagonal — core must have zero framework imports"), it enforced that constraint consistently across ~65 files without being reminded. Every use-case accepted interfaces in its constructor, every adapter implemented an explicit port, and the folder structure reflected the architecture rather than being an afterthought.
 
-I also learned to treat the agent like a senior pair-programmer who benefits from explicit context. The few corrections needed — Prisma v7's changed generator syntax, Tailwind v4's CSS-driven config replacing `tailwind.config.js` — happened at the boundary between general knowledge and version-specific APIs. Providing the project's installed package versions upfront would have eliminated these.
+I also learned to treat the agent like a senior pair-programmer who needs precise guardrails. The important challenges were not styling or syntax updates, but system-level decisions: where business rules should live, how to keep request validation at boundaries, how to avoid leaking ORM/HTTP concerns into core, and how to keep deployment config stable across local and Vercel/Supabase environments.
+
+Most of my learning came from reviewing and refining these architectural decisions, not just accepting generated code. I repeatedly asked for rationale, then checked whether the result still respected dependency direction (core -> ports, adapters -> core contracts) and whether each use-case stayed framework-agnostic.  
+
+---
+
+## Complex Challenges I Solved
+
+1. **Preserving hexagonal boundaries under real feature pressure**
+   While adding Banking and Pooling rules, it was easy to move logic into controllers for speed. Instead, I kept controllers thin (transport + validation only) and kept rules inside use-cases.
+
+2. **Modeling transaction-safe behavior in the persistence adapter**
+   Baseline switching required atomic updates. This was implemented using a transaction in the Prisma adapter so domain intent (exactly one baseline) remained consistent.
+
+3. **Designing cache as a replaceable adapter, not a core dependency**
+   Caching was introduced via `ICacheService` and injected into use-cases. That means in-memory cache can be replaced by Redis without changing domain/application logic.
+
+4. **Handling production integration issues without breaking architecture**
+   CORS and Supabase connection behavior differed between local and Vercel. I addressed those in infrastructure/config layers, not by changing core logic, which kept the architecture clean.
+
+5. **Managing domain edge cases in pooling and banking flows**
+   I validated cases like year-scoped compliance, invalid pooling combinations, and bank/apply limits with explicit business checks and tests, instead of relying on frontend assumptions.
+
+---
+
+## How This Shows My Hexagonal Understanding
+
+- I treated **use-cases as the only place for business decisions**.
+- I treated **ports as stability boundaries** and made adapters conform to them.
+- I used **dependency inversion** deliberately: core never imports Express, Prisma, or React.
+- I kept **inbound adapters** (HTTP/controllers/hooks) focused on input/output translation.
+- I kept **outbound adapters** (Prisma/cache) focused on side effects and persistence details.
+- I validated behavior mostly through **use-case and port-oriented tests**, which is exactly where hexagonal architecture provides value.
 
 ---
 
@@ -26,14 +58,14 @@ The 29/29 test pass rate on first run reflects another efficiency gain: the agen
 
 ## What I Would Do Differently Next Time
 
-**Provide version constraints in the initial prompt.** "Use Prisma v7" and "Use Tailwind v4" would have prevented the two self-corrections needed. The agent's general knowledge defaults to stable/common versions, so explicit version pinning at the start pays for itself immediately.
+**Start with non-negotiable architecture rules and acceptance checks.** Next time, I would define boundary checks up front (for example: no framework imports in core, all use-cases must depend on ports only, every adapter mapped to a port) and ask the agent to self-verify each phase against those checks.
 
-**Use the agent for integration tests too.** The current test suite covers units in isolation. The agent could also have generated supertest-based API integration tests and Playwright smoke tests — I would add those in a follow-up pass.
+**Add stronger integration and contract tests earlier.** The current suite is strong at unit level, but I would add adapter contract tests and end-to-end smoke tests earlier to catch deployment mismatches (CORS/env/DB connectivity) sooner.
 
-**Iterate on the UI earlier.** The backend was fully built before any UI work started. Running a quick frontend prototype first would let me validate the API shape against real component needs before finalising the backend routes.
+**Run deployment-like validation earlier, not at the end.** I would test with production-style env variables and URLs sooner so runtime issues surface before final polish.
 
 ---
 
 ## Conclusion
 
-AI-assisted development with GitHub Copilot at this complexity level is most effective when you combine a clear architectural specification with explicit technology constraints. The agent handles the mechanical work of consistent implementation, freeing the developer to focus on domain logic (the FuelEU formula, pool transfer rules, cache invalidation strategy) and code review. The role of the developer shifts from author to reviewer and architect — which is a more valuable use of time.
+AI-assisted development with GitHub Copilot at this complexity level is most effective when the developer drives architecture and verification actively. The agent accelerated implementation, but the real value came from my decisions on boundaries, rule placement, adapter contracts, and iterative validation. In this project, AI increased speed, while architectural ownership remained with me.

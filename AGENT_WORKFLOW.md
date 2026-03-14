@@ -14,230 +14,156 @@ generated, corrections applied, and observations on agent performance.
 
 ---
 
-## Phase 1 — Requirement Analysis & Architecture Design
+## Phase 1 — Plan Mode, Terminology, and Scope
 
 ### Prompt
 
-> "Can you explain this assignment to me like a beginner?"
-> (followed by) "I want to implement both bonus features (dark mode + animated KPIs, and in-memory cache)."
+> "I want to start in plan mode first. Explain this assignment in beginner language, especially CB, Banking, and Pooling."
+> "Before coding, give me a clear phased plan and assumptions."
 
 ### Output
 
-The agent produced:
-
-- A plain-English explanation of the FuelEU Maritime regulation (GHG intensity targets, Compliance Balance formula, Banking article 20, Pooling article 21)
-- A concise hexagonal architecture overview — core domain → ports (interfaces) → adapters (infra)
-- A 40-step numbered implementation plan saved to session memory
-
-### Agent Decision
-
-The agent asked clarifying preference questions before writing any code:
-
-- Database: PostgreSQL (local)
-- ORM: Prisma
-- Charts: Recharts
-- Extras: both dark mode/animated KPIs and in-memory cache
-
-**Correction/Observation**: No correction needed. The agent correctly paused to gather requirements before proceeding, preventing wasted implementation effort.
-
----
-
-## Phase 2 — Backend Domain & Ports
-
-### Prompt
-
-> "continue"
-
-### Output
-
-Files generated in parallel where possible:
-
-- `backend/src/core/domain/constants.ts` — `TARGET_GHG_INTENSITY = 89.3368`, `computeComplianceBalance()` formula
-- `backend/src/core/domain/entities/` — `Route.ts`, `ComplianceBalance.ts`, `BankEntry.ts`, `Pool.ts`
-- `backend/src/core/ports/outbound/` — 5 interface files: `IRouteRepository`, `IComplianceRepository`, `IBankRepository`, `IPoolRepository`, `ICacheService`
+- Beginner-friendly explanation of FuelEU terminology (CB formula, targets, banking rules, pooling rules)
+- Problem decomposition into implementation phases
+- Risks and assumptions identified before writing code
 
 ### Observation
 
-The agent correctly kept the `core/` folder free of any framework imports (no Express, no Prisma, no React). All types are plain TypeScript interfaces, ensuring the domain is fully testable in isolation.
+This phase was user-led: planning and vocabulary clarity came first, which reduced rework later.
 
 ---
 
-## Phase 3 — Use-Cases
+## Phase 2 — Architecture Learning and Project Direction
 
 ### Prompt
 
-> "continue"
+> "Now teach me hexagonal architecture in this context: core, ports, adapters, and how requests flow end-to-end."
+> "I want manual control of steps, so propose the sequence and wait for my go-ahead."
 
 ### Output
 
-8 use-case files generated:
-
-- `GetRoutesUseCase` — cache-first, 60s TTL
-- `SetBaselineUseCase` — validates route, invalidates cache pattern
-- `GetComparisonUseCase` — `percentDiff = ((route.ghg / baseline.ghg) - 1) * 100`
-- `ComputeCBUseCase` — `(89.3368 − ghg) × fuel × 41000`, upserts, 120s TTL
-- `GetAdjustedCBUseCase` — raw CB + banked total
-- `BankSurplusUseCase` — validates amount ≤ surplus CB, creates positive entry
-- `ApplyBankedUseCase` — validates amount ≤ total banked, creates negative entry
-- `CreatePoolUseCase` — greedy allocation (sort desc by CB, surplus transfers to deficit)
-
-### Agent Decision
-
-The agent independently chose to implement cache invalidation via `invalidatePattern('routes:*')` rather than deleting a hardcoded key, making the pattern more robust to future changes.
+- Clear architecture map for backend and frontend layers
+- Concrete sequencing strategy (domain -> ports -> use-cases -> adapters -> tests)
+- Technology choices confirmed (PostgreSQL, Prisma, Recharts, bonus features)
 
 ### Observation
 
-The pool validation logic (surplus ship cannot exit the pool with negative CB; deficit ship cannot exit worse than before) was correctly implemented without being explicitly specified in the prompt — the agent inferred it from the FuelEU regulation text.
+The work proceeded as guided execution, not autonomous generation without direction.
 
 ---
 
-## Phase 4 — Prisma Schema, Seed & Repositories
+## Phase 3 — Backend Domain and Port Contracts
 
 ### Prompt
 
-> "continue"
+> "Step 1: create domain entities and constants. Step 2: create outbound ports only. Keep core framework-agnostic."
 
 ### Output
 
-- `prisma/schema.prisma` — 5 models with correct Prisma v7 format (`prisma-client` generator, `src/generated/prisma` output path)
-- `prisma.config.ts` — Prisma v7 datasource config file
-- `prisma/seed.ts` — 5 seed routes (R001–R005) with realistic GHG intensities spanning compliant to highly non-compliant
-- 4 repository adapter files implementing the outbound port interfaces
+- Domain constants and entities for routes, compliance balance, banking, and pooling
+- Outbound interfaces for repository and cache boundaries
+- Core layer remained free of Express/Prisma imports
+
+### Observation
+
+This established strict separation of concerns early and made later testing straightforward.
+
+---
+
+## Phase 4 — Backend Use-Cases and Business Rules
+
+### Prompt
+
+> "Implement use-cases one by one and explain the business rule each one enforces (CB compute, banking limits, pooling validation)."
+
+### Output
+
+- Use-cases for routes, baseline, comparison, CB compute, adjusted CB, banking, and pooling
+- Cache-first behavior for expensive reads
+- Validation rules in application layer (bank/apply constraints, pool consistency)
+
+### Observation
+
+Rules were encoded in use-cases, keeping controllers thin and domain behavior testable.
+
+---
+
+## Phase 5 — Persistence, Seed Data, and Repository Adapters
+
+### Prompt
+
+> "Now wire persistence: Prisma schema, repositories per port, and seed realistic sample routes."
+> "Keep this compatible with Prisma v7."
+
+### Output
+
+- Prisma schema, config, migrations, and seed data (R001-R005)
+- Repository adapters implementing outbound ports
+- Transaction-safe baseline update logic
 
 ### Correction Applied
 
-**Prisma v7 uses a different generator provider syntax** (`"prisma-client"` not `"prisma-client-js"`) and requires a separate `prisma.config.ts` file. The agent self-corrected after recognising the v7 generator output format in the project's installed package version.
-
-### Observation
-
-The `PrismaRouteRepository.setBaseline()` method was implemented using `$transaction` to atomically clear the old baseline and set the new one — preventing a race condition that a naive two-step implementation would have.
+Prisma v7 format differences were corrected (`prisma-client` generator and explicit `prisma.config.ts`).
 
 ---
 
-## Phase 5 — Adapters, Controllers, DI & Server
+## Phase 6 — API Layer, DI Wiring, and Runtime Concerns
 
 ### Prompt
 
-> "continue"
+> "Build controllers and routers with validation at boundaries, then wire everything in a container."
+> "Set up server boot checks and CORS for frontend integration."
 
 ### Output
 
-- `InMemoryCacheService` — `Map<string, {value, expiresAt}>` with TTL-check on `get()`, pattern-matching on `invalidatePattern()`
-- 4 HTTP controllers with Zod request validation (body/query params)
-- 4 Express router files
-- `container.ts` — manual constructor injection, singleton instances
-- `app.ts` — Express factory with CORS (`process.env.FRONTEND_URL ?? 'http://localhost:5173'`), JSON middleware, route mounting
-- `server.ts` — entry point, `prisma.$connect()` startup check
-
-### Agent Decision
-
-The agent chose manual constructor injection over a library like `InversifyJS` or `tsyringe`, citing the assignment's focus on demonstrating the hexagonal pattern clearly rather than adding a secondary DI framework.
-
----
-
-## Phase 6 — Backend Tests
-
-### Prompt
-
-> "continue"
-
-### Output
-
-4 test files, 21 total test cases:
-
-- `constants.test.ts` — 5 tests for `computeComplianceBalance()` edge cases
-- `ComputeCBUseCase.test.ts` — 4 tests with mock repository and mock cache
-- `BankingUseCases.test.ts` — 8 tests covering happy path + error validation for both bank and apply
-- `CreatePoolUseCase.test.ts` — 4 tests: invalid pool (negative sum), valid pool (surplus→deficit transfer), edge cases
-
-**Result**: 21/21 tests pass on first run.
+- Express controllers and routers with Zod validation
+- Manual dependency injection container
+- In-memory cache adapter integrated via cache port
+- Server startup with DB connectivity check
+- CORS handling updated for deployed frontend origins
 
 ### Observation
 
-The agent consistently used mock objects implementing the port interfaces rather than patching module internals, keeping tests aligned with hexagonal architecture principles.
+Dependency direction stayed clean: HTTP and DB concerns remained outside core logic.
 
 ---
 
-## Phase 7 — Frontend: Core Domain, Ports, Use-Cases
+## Phase 7 — Frontend Implementation (Ports, Hooks, UI)
 
 ### Prompt
 
-> "continue"
+> "Mirror the same architecture on frontend: ports + use-cases first, then API adapters, hooks, and tabs."
+> "I want dark mode and animated KPI bonus included."
 
 ### Output
 
-- `core/domain/entities.ts` — all entity interfaces
-- 4 port interfaces in `core/ports/`
-- 5 use-case files in `core/application/usecases/`
+- Frontend domain models, ports, and use-cases
+- API adapters + hook orchestration for routes, comparison, banking, pooling
+- UI tabs and shared components (including animated KPI cards)
+- Dark mode with Tailwind v4-compatible setup
 
-### Observation
+### Correction Applied
 
-The frontend use-cases are thin orchestrators (call adapter via port → return result), mirroring the backend pattern. This keeps the hooks and components free of fetch/transformation logic.
-
----
-
-## Phase 8 — Frontend: API Adapters, Hooks, & UI Components
-
-### Prompt
-
-> "continue" (multiple times)
-
-### Output Per Batch
-
-**Adapters:**
-
-- `apiClient.ts` — base fetch wrapper, throws on non-2xx with parsed JSON error message
-- 4 API adapter classes implementing each service port
-- `container.ts` — factory functions with singleton adapter instances
-
-**React Hooks (inbound adapters):**
-
-- `useRoutes` — fetch + setBaseline, re-fetches on mutation
-- `useComparison` — lazy fetch triggered by route selection
-- `useBanking` — compute, bank surplus, apply banked, fetch records
-- `usePooling` — select ships, compute pool CB, create pool
-- `useDarkMode` — toggles `dark` class on `<html>`, persists to `localStorage`
-
-**Components:**
-
-- `KPICard.tsx` — framer-motion `useSpring` counter animation
-- `LoadingSpinner.tsx` / `ErrorBanner.tsx` — minimal shared utilities
-- `RoutesTab.tsx`, `CompareTab.tsx`, `BankingTab.tsx`, `PoolingTab.tsx`
-- `AppLayout.tsx` — nav + dark mode toggle + tab bar
-
-### Correction Applied (Tailwind v4)
-
-Initial `index.css` had leftover Vite default styles mixed with the Tailwind import. The agent corrected it to exactly:
-
-```css
-@import "tailwindcss";
-
-@custom-variant dark (&:where(.dark, .dark *));
-```
-
-No `tailwind.config.js` is used — Tailwind v4 is fully CSS-driven.
-
-### Observation
-
-The agent correctly noted that Tailwind v4's `@custom-variant` replaces the `darkMode: 'class'` config option from v3, and selected the `&:where(.dark, .dark *)` combinator to ensure that toggling the `dark` class on `<html>` propagates to nested elements without specificity wars.
+Tailwind v4 CSS setup was aligned to `@import "tailwindcss"` and `@custom-variant dark (...)`.
 
 ---
 
-## Phase 9 — Frontend Tests
+## Phase 8 — Testing, Refinement, and Deployment Debugging
 
 ### Prompt
 
-> "continue"
+> "Run tests and builds after each major milestone, then fix edge cases and deployment issues (Prisma, CORS, Supabase/Vercel envs)."
 
 ### Output
 
-3 test files, 8 total test cases:
+- Backend and frontend tests added and passing
+- Build verification for both apps
+- Pooling/banking UX logic refinements
+- Migration, seeding, and environment troubleshooting for deployment
 
-- `RouteUseCases.test.ts` — 2 tests: fetch routes, set baseline
-- `BankingUseCases.test.ts` — 4 tests: bank surplus validation, apply banked validation
-- `PoolUseCases.test.ts` — 2 tests: valid pool, invalid pool rejection
+### Observation
 
-**Result**: 8/8 tests pass on first run.
+This phase reflects iterative, manual steering: identify issue -> patch -> validate -> proceed.
 
 ---
 
